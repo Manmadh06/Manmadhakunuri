@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate God Level Pro Maxx Task Manager</title>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/uuid@8.3.2/dist/umd/uuidv4.min.js"></script>
+    <script src="https://unpkg.com/canvas-confetti@1.9.3/dist/confetti.browser.js"></script>
+
+    <style>
+        /* --- CSS STYLES (Ultimate God Level Pro Maxx Edition) --- */
+
+        /* Variables for easy theme changes */
+        :root {
+            --primary-color: #6200ea; /* Deep Purple */
+            --accent-color: #03dac6; /* Teal */
+            --text-color: #333333;
+            --light-text-color: #757575;
+            --background-light: #f4f6f9; /* Soft background */
+            --background-dark: #e0e6ed;
+            --white: #FFFFFF;
+            --shadow-soft: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.12);
+            --shadow-strong: rgba(0, 0, 0, 0.25);
+            --border-radius: 12px;
+            --input-focus-border: #9c27b0; /* Lighter purple on focus */
+            --danger-color: #e74c3c;
+        }
+
+        /* General Body Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: radial-gradient(circle at top left, var(--background-light), var(--background-dark));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: auto;
+            transition: background 0.5s ease-in-out;
+        }
+
+        /* Main App Container */
+        .task-manager-app {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: 0 20px 50px var(--shadow-strong); /* Stronger shadow */
+            padding: 40px;
+            width: 100%;
+            max-width: 700px; /* Even wider */
+            box-sizing: border-box;
+            margin: 25px;
+            min-height: 650px;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 3.2em; /* Larger title */
+            font-weight: 700;
+            letter-spacing: -0.8px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        }
+
+        /* Task Input Form */
+        .task-input-form {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px; /* Adjust margin */
+        }
+
+        .task-input-form input[type="text"] {
+            flex-grow: 1;
+            padding: 15px 20px;
+            border: 1px solid var(--background-dark);
+            border-radius: var(--border-radius);
+            font-size: 1.1em;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .task-input-form input[type="text"]:focus {
+            border-color: var(--input-focus-border);
+            box-shadow: 0 0 0 4px rgba(156, 39, 176, 0.25);
+        }
+
+        .task-input-form button {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 15px 25px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 5px 15px var(--shadow-medium);
+            font-weight: 600;
+        }
+
+        .task-input-form button:hover:not(:disabled) {
+            background-color: #4a00b0;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px var(--shadow-strong);
+        }
+        .task-input-form button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+            box-shadow: none;
+        }
+
+        /* Search Input */
+        .search-input-container {
+            margin-bottom: 25px;
+        }
+        .search-input-container input {
+            width: 100%;
+            padding: 12px 18px;
+            border: 1px solid var(--background-dark);
+            border-radius: var(--border-radius);
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .search-input-container input:focus {
+            border-color: var(--input-focus-border);
+            box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.2);
+        }
+
+
+        /* Controls Bar */
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--background-dark);
+            flex-wrap: wrap; /* Allow wrapping */
+            gap: 15px; /* Gap between elements */
+        }
+
+        .controls-bar .filters, .controls-bar .bulk-actions {
+            display: flex;
+            gap: 8px; /* Gap between buttons */
+            flex-wrap: wrap;
+        }
+
+        .filters button, .bulk-actions button {
+            background: none;
+            border: none;
+            padding: 10px 18px; /* More padding */
+            border-radius: 20px;
+            font-size: 0.95em;
+            cursor: pointer;
+            color: var(--light-text-color);
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+            font-weight: 500;
+        }
+
+        .filters button.active, .filters button:hover {
+            background-color: var(--accent-color);
+            color: var(--white);
+            box-shadow: 0 3px 10px rgba(3, 218, 198, 0.2);
+        }
+        .bulk-actions button {
+            background-color: var(--background-dark);
+            color: var(--primary-color);
+            box-shadow: 0 2px 8px var(--shadow-soft);
+        }
+        .bulk-actions button:hover {
+            background-color: var(--primary-color);
+            color: var(--white);
+            box-shadow: 0 5px 15px var(--shadow-medium);
+        }
+        .bulk-actions button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: var(--background-dark);
+            color: var(--light-text-color);
+            box-shadow: none;
+        }
+        .bulk-actions button.clear-all {
+            background-color: var(--danger-color);
+            color: var(--white);
+        }
+        .bulk-actions button.clear-all:hover {
+            background-color: #c0392b;
+        }
+
+
+        /* Task Progress Bar */
+        .task-progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding: 15px 20px;
+            background-color: var(--background-dark);
+            border-radius: var(--border-radius);
+            font-size: 0.9em;
+            color: var(--primary-color);
+            box-shadow: 0 2px 10px var(--shadow-soft);
+        }
+        .task-progress span {
+            font-weight: 600;
+        }
+
+        /* Task List */
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--background-dark);
+        }
+        .task-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        .task-list::-webkit-scrollbar-track {
+            background: var(--background-dark);
+            border-radius: 10px;
+        }
+        .task-list::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+        .task-list::-webkit-scrollbar-thumb:hover {
+            background: #4a00b0;
+        }
+
+
+        /* Individual Task Item */
+        .task-item {
+            background-color: var(--white);
+            border: 1px solid var(--background-dark);
+            border-radius: var(--border-radius);
+            padding: 18px 25px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 20px var(--shadow-soft); /* Deeper shadow */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            cursor: grab; /* Indicate draggable */
+            opacity: 1; /* Default opacity */
+            animation: slideIn 0.4s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .task-item.completed {
+            background-color: #f0fff0;
+            border-color: #c8e6c9;
+            opacity: 0.9;
+        }
+
+        .task-item.dragging {
+            opacity: 0.4;
+            border: 2px dashed var(--primary-color);
+            box-shadow: 0 0 0 5px rgba(98, 0, 234, 0.2);
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .task-item.drag-over {
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 0 0 5px rgba(3, 218, 198, 0.2);
+        }
+
+        .task-item:hover:not(.dragging) {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px var(--shadow-medium);
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: var(--light-text-color);
+            font-style: italic;
+        }
+
+        .task-text {
+            flex-grow: 1;
+            font-size: 1.15em;
+            color: var(--text-color);
+            user-select: none;
+            padding-right: 15px;
+            overflow-wrap: break-word; /* Ensure long text wraps */
+            word-break: break-all; /* Break words for long strings without spaces */
+        }
+
+        .task-text-edit {
+            flex-grow: 1;
+            padding: 8px 10px;
+            border: 1px solid var(--input-focus-border);
+            border-radius: var(--border-radius);
+            font-size: 1.15em;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.2);
+        }
+
+        .task-meta {
+            font-size: 0.8em;
+            color: var(--light-text-color);
+            margin-top: 5px;
+            text-align: right;
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0; /* Prevent actions from shrinking */
+        }
+
+        .task-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.4em; /* Larger icons */
+            padding: 10px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 5px var(--shadow-soft);
+        }
+
+        .task-actions .complete-btn {
+            color: var(--accent-color);
+        }
+        .task-actions .complete-btn:hover {
+            background-color: rgba(3, 218, 198, 0.15);
+            transform: scale(1.15);
+        }
+
+        .task-actions .edit-btn {
+            color: #ff9800; /* Orange for edit */
+        }
+        .task-actions .edit-btn:hover {
+            background-color: rgba(255, 152, 0, 0.15);
+            transform: scale(1.15);
+        }
+
+        .task-actions .delete-btn {
+            color: var(--danger-color);
+        }
+        .task-actions .delete-btn:hover {
+            background-color: rgba(231, 76, 60, 0.15);
+            transform: scale(1.15);
+        }
+
+        .task-actions .save-btn {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            font-size: 1em;
+        }
+        .task-actions .save-btn:hover {
+            background-color: #4a00b0;
+            transform: translateY(-2px);
+        }
+
+        .task-actions .cancel-btn {
+            background-color: var(--background-dark);
+            color: var(--text-color);
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            font-size: 1em;
+        }
+        .task-actions .cancel-btn:hover {
+            background-color: #c0c0c0;
+            transform: translateY(-2px);
+        }
+
+
+        /* Empty list / No results message */
+        .empty-list-message, .no-results-message {
+            text-align: center;
+            color: var(--light-text-color);
+            padding: 40px;
+            font-style: italic;
+            font-size: 1.1em;
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .task-manager-app {
+                padding: 30px;
+                min-height: 90vh; /* More height on mobile */
+            }
+            h1 {
+                font-size: 2.5em;
+            }
+            .controls-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 20px;
+            }
+            .filters, .bulk-actions {
+                justify-content: center;
+                gap: 10px;
+            }
+            .filters button, .bulk-actions button {
+                flex-basis: 48%; /* Two buttons per row */
+            }
+            .task-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 15px 20px;
+            }
+            .task-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            .task-text, .task-text-edit {
+                padding-right: 0;
+            }
+            .task-meta {
+                text-align: left;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .task-manager-app {
+                padding: 20px;
+                margin: 10px;
+            }
+            h1 {
+                font-size: 2em;
+                margin-bottom: 25px;
+            }
+            .task-input-form, .search-input-container {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div> <script type="text/babel">
+        // --- JAVASCRIPT (REACT) LOGIC (Ultimate God Level Pro Maxx Edition) ---
+        const { useState, useEffect, useRef } = React;
+
+        // Constants for Local Storage Key
+        const LOCAL_STORAGE_KEY = 'ultimateGodLevelTasks';
+
+        // --- Utility Functions ---
+
+        // Function to trigger confetti
+        const triggerConfetti = () => {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        };
+
+        /**
+         * TaskInput Component
+         * Renders an input field and a button to add new tasks.
+         * @param {function} onAddTask - Callback function to add a new task.
+         */
+        const TaskInput = ({ onAddTask }) => {
+            const [taskText, setTaskText] = useState('');
+            const inputRef = useRef(null);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (taskText.trim()) {
+                    onAddTask(taskText);
+                    setTaskText('');
+                    inputRef.current.focus();
+                }
+            };
+
+            return (
+                <form className="task-input-form" onSubmit={handleSubmit}>
+                    <input
+                        type="text"
+                        placeholder="What big thing needs to be done today?"
+                        value={taskText}
+                        onChange={(e) => setTaskText(e.target.value)}
+                        ref={inputRef}
+                        aria-label="New task text input"
+                    />
+                    <button type="submit" disabled={!taskText.trim()}>Add Task</button>
+                </form>
+            );
+        };
+
+        /**
+         * SearchInput Component
+         * Renders a search input field.
+         * @param {string} searchTerm - Current search term.
+         * @param {function} onSearchChange - Callback for search term change.
+         */
+        const SearchInput = ({ searchTerm, onSearchChange }) => {
+            return (
+                <div className="search-input-container">
+                    <input
+                        type="text"
+                        placeholder="Search tasks..."
+                        value={searchTerm}
+                        onChange={(e) => onSearchChange(e.target.value)}
+                        aria-label="Search tasks"
+                    />
+                </div>
+            );
+        };
+
+
+        /**
+         * TaskItem Component
+         * Renders a single task with its text, complete status, and action buttons.
+         */
+        const TaskItem = ({
+            task,
+            onToggleComplete,
+            onDeleteTask,
+            onEditTask,
+            isEditing,
+            onSaveEdit,
+            onCancelEdit,
+            currentEditText,
+            onEditTextChange,
+            // Drag and Drop props
+            onDragStart,
+            onDragOver,
+            onDrop,
+            onDragEnd
+        }) => {
+            const itemClass = `task-item ${task.completed ? 'completed' : ''} ${isEditing ? 'editing' : ''}`;
+            const createdAtDate = new Date(task.createdAt);
+            const formattedTime = createdAtDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const formattedDate = createdAtDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+            const handleSaveEdit = (e) => {
+                e.stopPropagation(); // Prevent toggling completion
+                onSaveEdit(task.id);
+            };
+
+            const handleCancelEdit = (e) => {
+                e.stopPropagation(); // Prevent toggling completion
+                onCancelEdit(task.id);
+            };
+
+            const handleKeyDown = (e) => {
+                if (e.key === 'Enter') {
+                    handleSaveEdit(e);
+                } else if (e.key === 'Escape') {
+                    handleCancelEdit(e);
+                }
+            };
+
+            return (
+                <li
+                    className={itemClass}
+                    draggable="true"
+                    onDragStart={(e) => onDragStart(e, task.id)}
+                    onDragOver={(e) => onDragOver(e, task.id)}
+                    onDrop={(e) => onDrop(e, task.id)}
+                    onDragEnd={onDragEnd}
+                >
+                    {isEditing ? (
+                        <input
+                            type="text"
+                            className="task-text-edit"
+                            value={currentEditText}
+                            onChange={(e) => onEditTextChange(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            autoFocus
+                            onBlur={handleSaveEdit} /* Auto-save on blur */
+                            aria-label={`Edit task: ${task.text}`}
+                        />
+                    ) : (
+                        <span className="task-text" onClick={() => onToggleComplete(task.id)}>
+                            {task.text}
+                        </span>
+                    )}
+
+                    <div className="task-actions">
+                        {isEditing ? (
+                            <>
+                                <button className="save-btn" onClick={handleSaveEdit} title="Save Changes" aria-label="Save changes">
+                                    Save
+                                </button>
+                                <button className="cancel-btn" onClick={handleCancelEdit} title="Cancel Editing" aria-label="Cancel editing">
+                                    Cancel
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    className="complete-btn"
+                                    onClick={() => onToggleComplete(task.id)}
+                                    title={task.completed ? "Mark as Incomplete" : "Mark as Complete"}
+                                    aria-label={task.completed ? "Mark as Incomplete" : "Mark as Complete"}
+                                >
+                                    {task.completed ? '✅' : '✔️'}
+                                </button>
+                                <button
+                                    className="edit-btn"
+                                    onClick={(e) => { e.stopPropagation(); onEditTask(task.id, task.text); }}
+                                    title="Edit Task"
+                                    aria-label="Edit task"
+                                >
+                                    ✏️
+                                </button>
+                                <button
+                                    className="delete-btn"
+                                    onClick={(e) => { e.stopPropagation(); onDeleteTask(task.id); }}
+                                    title="Delete Task"
+                                    aria-label="Delete task"
+                                >
+                                    🗑️
+                                </button>
+                            </>
+                        )}
+                    </div>
+                    {!isEditing && (
+                        <div className="task-meta">
+                            Added: {formattedDate} at {formattedTime}
+                        </div>
+                    )}
+                </li>
+            );
+        };
+
+        /**
+         * TaskList Component
+         * Renders a list of TaskItem components.
+         */
+        const TaskList = ({
+            tasks,
+            onToggleComplete,
+            onDeleteTask,
+            onEditTask,
+            editingTaskId,
+            onSaveEdit,
+            onCancelEdit,
+            currentEditText,
+            onEditTextChange,
+            // Drag and Drop props
+            onDragStart,
+            onDragOver,
+            onDrop,
+            onDragEnd,
+            searchTerm
+        }) => {
+            if (tasks.length === 0) {
+                return (
+                    <p className="empty-list-message">
+                        {searchTerm ? "No tasks found matching your search." : "✨ Your to-do list is sparkling clean! Add a new task above. ✨"}
+                    </p>
+                );
+            }
+
+            return (
+                <ul className="task-list">
+                    {tasks.map(task => (
+                        <TaskItem
+                            key={task.id}
+                            task={task}
+                            onToggleComplete={onToggleComplete}
+                            onDeleteTask={onDeleteTask}
+                            onEditTask={onEditTask}
+                            isEditing={editingTaskId === task.id}
+                            onSaveEdit={onSaveEdit}
+                            onCancelEdit={onCancelEdit}
+                            currentEditText={currentEditText}
+                            onEditTextChange={onEditTextChange}
+                            onDragStart={onDragStart}
+                            onDragOver={onDragOver}
+                            onDrop={onDrop}
+                            onDragEnd={onDragEnd}
+                        />
+                    ))}
+                </ul>
+            );
+        };
+
+        /**
+         * App Component (Main Application - Ultimate God Level Pro Maxx Logic)
+         * Manages overall state, persistence, filtering, sorting, editing, and drag-and-drop.
+         */
+        const App = () => {
+            // Function to generate a recent ISO date string for demo tasks
+            const getRecentDate = (daysAgo = 0, hoursAgo = 0, minutesAgo = 0) => {
+                const date = new Date();
+                date.setDate(date.getDate() - daysAgo);
+                date.setHours(date.getHours() - hoursAgo);
+                date.setMinutes(date.getMinutes() - minutesAgo);
+                return date.toISOString();
+            };
+
+            const [tasks, setTasks] = useState(() => {
+                const storedTasks = localStorage.getItem(LOCAL_STORAGE_KEY);
+                // If there are stored tasks, use them. Otherwise, initialize with default tasks.
+                if (storedTasks) {
+                    return JSON.parse(storedTasks);
+                } else {
+                    return [
+                        // --- Programming Tasks ---
+                        { id: uuidv4(), text: 'Refactor old React component for better performance', completed: false, createdAt: getRecentDate(0, 2, 30) },
+                        { id: uuidv4(), text: 'Explore Rust language basics and syntax', completed: false, createdAt: getRecentDate(1, 10, 0) },
+                        { id: uuidv4(), text: 'Debug API integration issue in backend service', completed: false, createdAt: getRecentDate(0, 0, 15) },
+                        { id: uuidv4(), text: 'Write unit tests for new authentication module', completed: true, createdAt: getRecentDate(2, 5, 45) },
+                        { id: uuidv4(), text: 'Read latest article on WebAssembly benefits', completed: false, createdAt: getRecentDate(0, 1, 0) },
+
+                        // --- Gaming Tasks ---
+                        { id: uuidv4(), text: 'Finish Elden Ring: Shadow of the Erdtree DLC', completed: false, createdAt: getRecentDate(0, 3, 0) },
+                        { id: uuidv4(), text: 'Try out the new indie game on Steam - "Stardew Valley"', completed: false, createdAt: getRecentDate(1, 15, 0) },
+                        { id: uuidv4(), text: 'Organize game library and uninstall old titles', completed: true, createdAt: getRecentDate(3, 8, 20) },
+                        { id: uuidv4(), text: 'Complete daily quests in Genshin Impact', completed: false, createdAt: getRecentDate(0, 0, 5) },
+                        { id: uuidv4(), text: 'Play 3 rounds of Valorant with friends', completed: false, createdAt: getRecentDate(0, 1, 45) },
+
+                        // --- Exercise Tasks ---
+                        { id: uuidv4(), text: 'Morning jog for 30 minutes in the park', completed: false, createdAt: getRecentDate(0, 4, 0) },
+                        { id: uuidv4(), text: 'Complete 1-hour strength training session', completed: false, createdAt: getRecentDate(1, 6, 0) },
+                        { id: uuidv4(), text: 'Do 10 minutes of stretching and foam rolling', completed: true, createdAt: getRecentDate(0, 7, 0) },
+                        { id: uuidv4(), text: 'Attend evening yoga class', completed: false, createdAt: getRecentDate(0, 1, 10) },
+                        { id: uuidv4(), text: 'Plan next week\'s workout routine', completed: false, createdAt: getRecentDate(4, 2, 0) }
+                    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Ensure initial sort
+                }
+            });
+
+            const [filter, setFilter] = useState('all');
+            const [searchTerm, setSearchTerm] = useState('');
+
+            // State for editing tasks
+            const [editingTaskId, setEditingTaskId] = useState(null);
+            const [currentEditText, setCurrentEditText] = useState('');
+
+            // State for drag and drop
+            const dragItem = useRef(null); // Ref to store the ID of the item being dragged
+            const dragOverItem = useRef(null); // Ref to store the ID of the item being dragged over
+
+            // Effect to save tasks to Local Storage
+            useEffect(() => {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tasks));
+            }, [tasks]);
+
+            /**
+             * Adds a new task.
+             */
+            const addTask = (text) => {
+                const newTask = {
+                    id: uuidv4(),
+                    text,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+                setTasks((prevTasks) => [newTask, ...prevTasks]); // Add to top for newest first
+            };
+
+            /**
+             * Toggles 'completed' status.
+             */
+            const toggleTaskComplete = (id) => {
+                setTasks((prevTasks) =>
+                    prevTasks.map((task) => {
+                        if (task.id === id) {
+                            if (!task.completed) {
+                                triggerConfetti();
+                            }
+                            return { ...task, completed: !task.completed };
+                        }
+                        return task;
+                    })
+                );
+            };
+
+            /**
+             * Deletes a task.
+             */
+            const deleteTask = (id) => {
+                if (window.confirm("Are you sure you want to delete this task?")) {
+                    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+                }
+            };
+
+            /**
+             * Initiates task editing.
+             */
+            const editTask = (id, text) => {
+                setEditingTaskId(id);
+                setCurrentEditText(text);
+            };
+
+            /**
+             * Saves edited task text.
+             */
+            const saveEdit = (id) => {
+                if (currentEditText.trim()) {
+                    setTasks((prevTasks) =>
+                        prevTasks.map((task) =>
+                            task.id === id ? { ...task, text: currentEditText.trim() } : task
+                        )
+                    );
+                    setEditingTaskId(null);
+                    setCurrentEditText('');
+                } else {
+                    alert("Task text cannot be empty! Please enter some text or cancel editing.");
+                }
+            };
+
+            /**
+             * Cancels task editing.
+             */
+            const cancelEdit = (id) => {
+                setEditingTaskId(null);
+                setCurrentEditText('');
+            };
+
+            /**
+             * Clears all completed tasks.
+             */
+            const clearCompletedTasks = () => {
+                const hasCompleted = tasks.some(task => task.completed);
+                if (hasCompleted && window.confirm("Are you sure you want to clear all completed tasks?")) {
+                    setTasks((prevTasks) => prevTasks.filter((task) => !task.completed));
+                }
+            };
+
+            /**
+             * Clears ALL tasks.
+             */
+            const clearAllTasks = () => {
+                if (tasks.length > 0 && window.confirm("Are you sure you want to clear ALL tasks? This cannot be undone!")) {
+                    setTasks([]);
+                }
+            };
+
+            // --- Drag and Drop Handlers ---
+            const handleDragStart = (e, id) => {
+                dragItem.current = id;
+                e.dataTransfer.effectAllowed = 'move';
+                e.currentTarget.classList.add('dragging');
+            };
+
+            const handleDragOver = (e, id) => {
+                e.preventDefault(); // Crucial to allow dropping
+                dragOverItem.current = id;
+
+                const currentTarget = e.currentTarget;
+                if (currentTarget.classList.contains('task-item')) {
+                    Array.from(currentTarget.parentNode.children).forEach(child => {
+                        child.classList.remove('drag-over');
+                    });
+                    currentTarget.classList.add('drag-over');
+                }
+            };
+
+            const handleDrop = (e, id) => {
+                e.preventDefault();
+                const draggedId = dragItem.current;
+                const dropTargetId = id;
+
+                if (draggedId === dropTargetId || !draggedId || !dropTargetId) {
+                    return;
+                }
+
+                setTasks((prevTasks) => {
+                    const newTasks = [...prevTasks];
+                    const draggedIndex = newTasks.findIndex(task => task.id === draggedId);
+                    const dropTargetIndex = newTasks.findIndex(task => task.id === dropTargetId);
+
+                    if (draggedIndex === -1 || dropTargetIndex === -1) return newTasks;
+
+                    const [draggedTask] = newTasks.splice(draggedIndex, 1);
+                    newTasks.splice(dropTargetIndex, 0, draggedTask);
+
+                    return newTasks;
+                });
+
+                dragItem.current = null;
+                dragOverItem.current = null;
+                e.currentTarget.classList.remove('drag-over');
+            };
+
+            const handleDragEnd = (e) => {
+                e.currentTarget.classList.remove('dragging');
+                document.querySelectorAll('.task-item.drag-over').forEach(el => {
+                    el.classList.remove('drag-over');
+                });
+                dragItem.current = null;
+                dragOverItem.current = null;
+            };
+
+            // --- Derived State: Filtered & Sorted Tasks ---
+            const filteredAndSortedTasks = tasks
+                .filter(task => {
+                    if (searchTerm) {
+                        return task.text.toLowerCase().includes(searchTerm.toLowerCase());
+                    }
+                    return true;
+                })
+                .filter(task => {
+                    if (filter === 'active') return !task.completed;
+                    if (filter === 'completed') return task.completed;
+                    return true;
+                });
+
+            // Task Counts for Progress Bar
+            const totalTasks = tasks.length;
+            const activeTasks = tasks.filter(task => !task.completed).length;
+            const completedTasks = tasks.filter(task => task.completed).length;
+
+            return (
+                <div className="task-manager-app">
+                    <h1>Ultimate Task Manager</h1>
+                    <TaskInput onAddTask={addTask} />
+                    <SearchInput searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+
+                    <div className="controls-bar">
+                        <div className="filters" role="group" aria-label="Task Filters">
+                            <button
+                                className={filter === 'all' ? 'active' : ''}
+                                onClick={() => setFilter('all')}
+                                aria-pressed={filter === 'all'}
+                            >
+                                All ({totalTasks})
+                            </button>
+                            <button
+                                className={filter === 'active' ? 'active' : ''}
+                                onClick={() => setFilter('active')}
+                                aria-pressed={filter === 'active'}
+                            >
+                                Active ({activeTasks})
+                            </button>
+                            <button
+                                className={filter === 'completed' ? 'active' : ''}
+                                onClick={() => setFilter('completed')}
+                                aria-pressed={filter === 'completed'}
+                            >
+                                Completed ({completedTasks})
+                            </button>
+                        </div>
+                        <div className="bulk-actions" role="group" aria-label="Bulk Task Actions">
+                            <button onClick={clearCompletedTasks} disabled={!completedTasks}>
+                                Clear Completed
+                            </button>
+                            <button onClick={clearAllTasks} disabled={!totalTasks} className="clear-all">
+                                Clear All
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="task-progress">
+                        <span>Total: {totalTasks}</span>
+                        <span>Active: {activeTasks}</span>
+                        <span>Completed: {completedTasks}</span>
+                    </div>
+
+                    <TaskList
+                        tasks={filteredAndSortedTasks}
+                        onToggleComplete={toggleTaskComplete}
+                        onDeleteTask={deleteTask}
+                        onEditTask={editTask}
+                        editingTaskId={editingTaskId}
+                        onSaveEdit={saveEdit}
+                        onCancelEdit={cancelEdit}
+                        currentEditText={currentEditText}
+                        onEditTextChange={setCurrentEditText}
+                        onDragStart={handleDragStart}
+                        onDragOver={handleDragOver}
+                        onDrop={handleDrop}
+                        onDragEnd={handleDragEnd}
+                        searchTerm={searchTerm}
+                    />
+                </div>
+            );
+        };
+
+        // --- Render the App component into the root DOM element ---
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(
+            <React.StrictMode>
+                <App />
+            </React.StrictMode>
+        );
+    </script>
+</body>
+</html>
